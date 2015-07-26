@@ -1,34 +1,124 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Earl Bot</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
     <style>
+      html,
       body {
-        font-family: "Helvetica Neue", helvetica, arial;
-        padding: 15px;
+        height: 100%;
       }
 
-      ul {
-        list-style: none;
-        margin: 0;
-        padding: 0;
+      .compass {
+        display: flex;
+        align-items: center;
+        height: 100%;
+        width: 100%;
       }
 
-      ul li {
-        line-height: 1.4;
+      .north {
+        position: absolute;
+        top: 0;
+        width: 100%;
+      }
+
+      .south {
+        bottom: 0;
+        position: absolute;
+        width: 100%;
+      }
+
+      .east {
+        position: absolute;
+        right: 0;
+      }
+
+      .west {
+        position: absolute;
+        left: 0;
+      }
+
+      .horizontal {
+        width: 100%;
       }
     </style>
+  </head>
+  <body class="text-muted">
 
+    <div class="north text-center">
+      <i class="fa fa-angle-double-up fa-5x"></i>
+    </div>
+
+    <div class="compass">
+      <div class="horizontal text-center">
+        <div class="west">
+          <i class="fa fa-angle-double-left fa-5x"></i>
+        </div>
+        <div class="east">
+          <i class="fa fa-angle-double-right fa-5x"></i>
+        </div>
+        <div class="center">
+          <i class="fa fa-bullseye fa-5x"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="south text-center">
+      <i class="fa fa-angle-double-down fa-5x"></i>
+    </div>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.touchswipe/1.6.9/jquery.touchSwipe.js"></script>
     <script>
       var host = location.origin.replace(/^http/, 'ws')
       var ws = new WebSocket(host);
-      ws.onmessage = function (event) {
-        var li = document.createElement('li');
-        li.innerHTML = JSON.parse(event.data);
-        document.querySelector('#pings').appendChild(li);
-      };
+
+      $(function () {
+        FastClick.attach(document.body);
+
+        $(document).on('click', function () {
+          emit('space');
+        }).on('keydown', function (e) {
+          switch (e.keyCode) {
+            case 66:
+            case 69:
+            case 70:
+            case 81:
+              emit(String.fromCharCode(e.keyCode).toLowerCase());
+            break;
+            case 32:
+              emit('space');
+            break;
+            case 37:
+              emit('left');
+            break;
+            case 38:
+              emit('up');
+            break;
+            case 39:
+              emit('right');
+            break;
+            case 40:
+              emit('down');
+            break;
+          }
+        })
+        .swipe({
+          swipe: function (event, direction) {
+            emit(direction);
+          }
+        });
+      });
+
+      function emit (name) {
+        console.log('Emitting: ' + name);
+        ws.send(name);
+      }
     </script>
-  </head>
-  <body>
-    <h1>Pings</h1>
-    <ul id='pings'></ul>
   </body>
 </html>
